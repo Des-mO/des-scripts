@@ -2,7 +2,7 @@ fx_version 'cerulean'
 game 'gta5'
 
 author 'desmØ#1111'
-description 'des-racing'
+description 'Treasure Hunt'
 version '1.0'
 
 
