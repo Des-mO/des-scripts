@@ -1,12 +1,16 @@
 -- Define a variable to store the previous health of each vehicle
 local previousHealth = {}
 
--- Damage modifiers for different types of damage
-local damageModifiers = {
-    [1] = 0.5, -- Collision damage modifier
-    [GetHashKey("WEAPON_PISTOL")] = 1.0, -- Bullet damage modifier for pistol
-    [GetHashKey("WEAPON_SMG")] = 1.5, -- Bullet damage modifier for SMG
-}
+-- Function to calculate collision damage based on velocity
+function CalculateCollisionDamage(velocity)
+    -- Retrieve the configuration values from the configuration file
+    local minimumCollisionVelocity = Config.MinimumCollisionVelocity
+    local collisionDamageMultiplier = Config.CollisionDamageMultiplier
+
+    -- Calculate the collision damage based on the velocity and the configured multiplier
+    local collisionDamage = velocity * collisionDamageMultiplier
+    return collisionDamage
+end
 
 -- Function to handle vehicle damage
 function HandleVehicleDamage(attacker, weaponHash, damageAmount, damageType, entity)
@@ -22,25 +26,24 @@ function HandleVehicleDamage(attacker, weaponHash, damageAmount, damageType, ent
             if currentHealth < previous then
                 -- Vehicle has taken damage
 
-                local damageModifier = 1.0 -- Default damage modifier
+                -- Collision damage
+                if damageType == 1 then
+                    -- Calculate the collision velocity
+                    local collisionVelocity = #(previous - currentHealth)
 
-                -- Check if a specific damage modifier exists for the damage type
-                if damageModifiers[damageType] ~= nil then
-                    damageModifier = damageModifiers[damageType]
-                elseif damageModifiers[weaponHash] ~= nil then
-                    damageModifier = damageModifiers[weaponHash]
+                    -- Check if collision velocity exceeds the minimum threshold
+                    if collisionVelocity > Config.MinimumCollisionVelocity then
+                        local collisionDamage = CalculateCollisionDamage(collisionVelocity)
+
+                        -- Handle collision damage here
+                        print("Vehicle collided with an object. Damage: " .. collisionDamage)
+                    end
                 end
 
-                -- Apply the damage modifier to the damage amount
-                local modifiedDamage = damageAmount * damageModifier
-
-                -- Handle the modified damage here based on the type of damage
-                if damageType == 1 then
-                    -- Collision damage
-                    print("Vehicle collided with an object. Damage: " .. modifiedDamage)
-                elseif weaponHash == GetHashKey("WEAPON_PISTOL") or weaponHash == GetHashKey("WEAPON_SMG") then
-                    -- Bullet damage
-                    print("Vehicle was shot by a player. Damage: " .. modifiedDamage)
+                -- Bullet damage
+                if weaponHash == GetHashKey("WEAPON_PISTOL") or weaponHash == GetHashKey("WEAPON_SMG") then
+                    -- Handle bullet damage here
+                    print("Vehicle was shot by a player. Damage: " .. damageAmount)
                 end
             end
         end
