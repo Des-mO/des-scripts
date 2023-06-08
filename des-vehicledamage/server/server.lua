@@ -32,19 +32,12 @@ function HandleVehicleDamage(attacker, weaponHash, damageAmount, damageType, ent
     end
 end
 
-Citizen.CreateThread(function()
-    while true do
-        Citizen.Wait(0)
-        local playerPed = PlayerPedId()
-
-        if IsPlayerFreeAiming(playerPed) then
-            local isAiming, entity = GetEntityPlayerIsFreeAimingAt(PlayerId())
-
-            if isAiming and IsEntityAVehicle(entity) then
-                previousHealth[entity] = Entity(entity):GetHealth()
-            end
-        end
-    end
+AddEventHandler("entitydamaged", function(attacker, weaponHash, damageAmount, damageType, entity)
+    HandleVehicleDamage(attacker, weaponHash, damageAmount, damageType, entity)
 end)
 
-AddEventHandler("entitydamaged", HandleVehicleDamage)
+AddEventHandler("playerTargetEntity", function(entity)
+    if IsEntityAVehicle(entity) then
+        previousHealth[entity] = Entity(entity):GetHealth()
+    end
+end)
