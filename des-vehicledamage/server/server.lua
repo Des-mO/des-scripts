@@ -32,12 +32,20 @@ function HandleVehicleDamage(attacker, weaponHash, damageAmount, damageType, ent
     end
 end
 
-AddEventHandler("entitydamaged", function(attacker, weaponHash, damageAmount, damageType, entity)
+RegisterNetEvent("vehicleDamage")
+AddEventHandler("vehicleDamage", function(attacker, weaponHash, damageAmount, damageType, entity)
+    local source = source
     HandleVehicleDamage(attacker, weaponHash, damageAmount, damageType, entity)
 end)
 
-AddEventHandler("playerTargetEntity", function(entity)
-    if IsEntityAVehicle(entity) then
-        previousHealth[entity] = Entity(entity):GetHealth()
-    end
+RegisterCommand("damageVehicle", function(source, args, rawCommand)
+    local playerPed = GetPlayerPed(source)
+    local attacker = playerPed
+    local weaponHash = GetSelectedPedWeapon(playerPed)
+    local damageAmount = tonumber(args[1])
+    local damageType = tonumber(args[2])
+    local vehicle = GetVehiclePedIsIn(playerPed, false)
+    local entity = vehicle or playerPed
+
+    TriggerEvent("vehicleDamage", attacker, weaponHash, damageAmount, damageType, entity)
 end)
